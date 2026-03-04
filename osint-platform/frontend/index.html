@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0a0e1a;
+            color: #e0e6f0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0d1b2e, #1a2744);
+            border-bottom: 1px solid #1e3a5f;
+            padding: 18px 32px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #00d4ff;
+            letter-spacing: 1px;
+        }
+
+        .logo span { color: #ff4d6d; }
+
+        .subtitle {
+            color: #5a7a9a;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: #0d1b2e;
+            border-radius: 12px;
+            padding: 6px;
+            margin-bottom: 28px;
+            border: 1px solid #1e3a5f;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 16px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: #5a7a9a;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .tab-btn:hover { background: #1a2744; color: #a0b8d0; }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #0066cc, #0044aa);
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(0, 100, 200, 0.4);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .search-card {
+            background: #0d1b2e;
+            border: 1px solid #1e3a5f;
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .search-card h2 {
+            font-size: 18px;
+            color: #00d4ff;
+            margin-bottom: 6px;
+        }
+
+        .search-card p {
+            color: #5a7a9a;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: #5a7a9a;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input[type="text"], input[type="email"], input[type="tel"] {
+            width: 100%;
+            background: #060d1a;
+            border: 1px solid #1e3a5f;
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #e0e6f0;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus { border-color: #0066cc; }
+
+        .search-btn {
+            background: linear-gradient(135deg, #0066cc, #004499);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 11px 28px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-btn:hover {
+            background: linear-gradient(135deg, #0077ee, #0055bb);
+            transform: translateY(-1px);
+        }
+
+        .search-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Results */
+        .results-area { display: none; }
+        .results-area.show { display: block; }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #5a7a9a;
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #1e3a5f;
+            border-top-color: #0066cc;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .result-section {
+            background: #0d1b2e;
+            border: 1px solid #1e3a5f;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .result-section h3 {
+            font-size: 15px;
+            color: #00d4ff;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            background: #003366;
+            color: #00aaff;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        .badge.green { background: #003322; color: #00cc88; }
+        .badge.red { background: #330011; color: #ff4d6d; }
+
+        .found-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: #060d1a;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            border: 1px solid #0d2040;
+        }
+
+        .found-item .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00cc88;
+            flex-shrink: 0;
+        }
+
+        .found-item a {
+            color: #4db8ff;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .found-item a:hover { color: #00d4ff; text-decoration: underline; }
+
+        .username-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .username-tag {
+            background: #060d1a;
+            border: 1px solid #1e3a5f;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: #a0b8d0;
+            font-family: monospace;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .service-card {
+            background: #060d1a;
+            border: 1px solid #1e3a5f;
+            border-radius: 8px;
+            padding: 14px;
+        }
+
+        .service-card .service-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #e0e6f0;
+            margin-bottom: 4px;
+        }
+
+        .service-card .service-desc {
+            font-size: 12px;
+            color: #5a7a9a;
+            margin-bottom: 8px;
+        }
+
+        .service-card a {
+            color: #4db8ff;
+            text-decoration: none;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .info-item {
+            background: #060d1a;
+            border: 1px solid #1e3a5f;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .info-item .info-label {
+            font-size: 11px;
+            color: #5a7a9a;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .info-item .info-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #e0e6f0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #3a5a7a;
+            font-size: 14px;
+        }
+
+        /* Image upload */
+        .drop-zone {
+            border: 2px dashed #1e3a5f;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #060d1a;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #0066cc;
+            background: #0a1528;
+        }
+
+        .drop-zone .icon { font-size: 40px; margin-bottom: 12px; }
+        .drop-zone p { color: #5a7a9a; font-size: 14px; }
+        .drop-zone input { display: none; }
+
+        #preview-img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .error-msg {
+            background: #1a0a0e;
+            border: 1px solid #3a1a22;
+            color: #ff4d6d;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .disclaimer {
+            background: #0a100a;
+            border: 1px solid #1a3a1a;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 12px;
+            color: #4a8a4a;
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <div class="logo">OSINT<span>EYE</span></div>
+        <div class="subtitle">Narzędzie wyszukiwania informacji publicznych</div>
+    </div>
+</header>
+
+<div class="container">
+    <div class="disclaimer">
+        ⚠️ <strong>Tylko do celów edukacyjnych.</strong>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('name')">👤 Imię i Nazwisko</button>
+        <button class="tab-btn" onclick="switchTab('email')">✉️ Email</button>
+        <button class="tab-btn" onclick="switchTab('phone')">📱 Telefon</button>
+        <button class="tab-btn" onclick="switchTab('image')">🖼️ Zdjęcie</button>
+        <button class="tab-btn" onclick="switchTab('all')">🔍 Wszystko</button>
+    </div>
+
+    <!-- NAME SEARCH -->
+    <div id="tab-name" class="tab-content active">
+        <div class="search-card">
+            <h2>👤 Wyszukaj po Imieniu i Nazwisku</h2>
+            <p>Znajdź profile w mediach społecznościowych i generuje możliwe nazwy użytkownika.</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Imię</label>
+                    <input type="text" id="first-name" placeholder="np. Jan">
+                </div>
+                <div class="form-group">
+                    <label>Nazwisko</label>
+                    <input type="text" id="last-name" placeholder="np. Kowalski">
+                </div>
+            </div>
+            <button class="search-btn" onclick="searchName()">🔍 Szukaj</button>
+        </div>
+        <div id="results-name" class="results-area"></div>
+    </div>
+
+    <!-- EMAIL SEARCH -->
+    <div id="tab-email" class="tab-content">
+        <div class="search-card">
+            <h2>✉️ Wyszukaj po Emailu</h2>
+            <p>Sprawdza 120+ serwisów czy email jest zarejestrowany oraz wycieki danych.</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Adres Email</label>
+                    <input type="email" id="email-input" placeholder="np. jan.kowalski@gmail.com">
+                </div>
+            </div>
+            <button class="search-btn" onclick="searchEmail()">🔍 Szukaj</button>
+        </div>
+        <div id="results-email" class="results-area"></div>
+    </div>
+
+    <!-- PHONE SEARCH -->
+    <div id="tab-phone" class="tab-content">
+        <div class="search-card">
+            <h2>📱 Wyszukaj po Numerze Telefonu</h2>
+            <p>Sprawdza informacje o numerze, operatorze i generuje linki do sprawdzenia.</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Numer Telefonu (z kierunkowym)</label>
+                    <input type="tel" id="phone-input" placeholder="np. +48 123 456 789">
+                </div>
+            </div>
+            <button class="search-btn" onclick="searchPhone()">🔍 Szukaj</button>
+        </div>
+        <div id="results-phone" class="results-area"></div>
+    </div>
+
+    <!-- IMAGE SEARCH -->
+    <div id="tab-image" class="tab-content">
+        <div class="search-card">
+            <h2>🖼️ Wyszukaj po Zdjęciu</h2>
+            <p>Wgraj zdjęcie aby uzyskać linki do wyszukiwarek twarzy i reverse image search.</p>
+            <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <div class="icon">📸</div>
+                <p>Kliknij lub przeciągnij zdjęcie tutaj</p>
+                <p style="font-size:11px; margin-top:6px; color:#3a5a7a">JPG, PNG, WEBP</p>
+                <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)">
+                <img id="preview-img">
+            </div>
+            <br>
+            <button class="search-btn" id="img-search-btn" onclick="searchImage()" disabled>🔍 Analizuj Zdjęcie</button>
+        </div>
+        <div id="results-image" class="results-area"></div>
+    </div>
+
+    <!-- ALL SEARCH -->
+    <div id="tab-all" class="tab-content">
+        <div class="search-card">
+            <h2>🔍 Wyszukaj Wszystkiego Jednocześnie</h2>
+            <p>Podaj wszystkie dostępne dane — system przeszuka jednocześnie wszystkie moduły.</p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Imię</label>
+                    <input type="text" id="all-first-name" placeholder="Jan">
+                </div>
+                <div class="form-group">
+                    <label>Nazwisko</label>
+                    <input type="text" id="all-last-name" placeholder="Kowalski">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Email (opcjonalnie)</label>
+                    <input type="email" id="all-email" placeholder="jan@gmail.com">
+                </div>
+                <div class="form-group">
+                    <label>Telefon (opcjonalnie)</label>
+                    <input type="tel" id="all-phone" placeholder="+48 123 456 789">
+                </div>
+            </div>
+            <button class="search-btn" onclick="searchAll()">🔍 Uruchom Pełne Wyszukiwanie</button>
+        </div>
+        <div id="results-all" class="results-area"></div>
+    </div>
+</div>
+
+<script>
+const API = window.location.origin;
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    event.target.classList.add('active');
+}
+
+function showLoading(el) {
+    el.innerHTML = '<div class="loading"><div class="spinner"></div><p>Trwa wyszukiwanie...</p></div>';
+    el.classList.add('show');
+}
+
+function showError(el, msg) {
+    el.innerHTML = `<div class="error-msg">❌ ${msg}</div>`;
+    el.classList.add('show');
+}
+
+async function searchName() {
+    const fn = document.getElementById('first-name').value.trim();
+    const ln = document.getElementById('last-name').value.trim();
+    if (!fn || !ln) { alert('Podaj imię i nazwisko!'); return; }
+    const el = document.getElementById('results-name');
+    showLoading(el);
+    try {
+        const fd = new FormData();
+        fd.append('first_name', fn);
+        fd.append('last_name', ln);
+        const res = await fetch(`${API}/api/search/name`, { method: 'POST', body: fd });
+        const data = await res.json();
+        renderNameResults(el, data.results, fn + ' ' + ln);
+    } catch(e) { showError(el, 'Błąd połączenia z serwerem: ' + e.message); }
+}
+
+async function searchEmail() {
+    const email = document.getElementById('email-input').value.trim();
+    if (!email) { alert('Podaj adres email!'); return; }
+    const el = document.getElementById('results-email');
+    showLoading(el);
+    try {
+        const fd = new FormData();
+        fd.append('email', email);
+        const res = await fetch(`${API}/api/search/email`, { method: 'POST', body: fd });
+        const data = await res.json();
+        renderEmailResults(el, data.results, email);
+    } catch(e) { showError(el, 'Błąd połączenia z serwerem: ' + e.message); }
+}
+
+async function searchPhone() {
+    const phone = document.getElementById('phone-input').value.trim();
+    if (!phone) { alert('Podaj numer telefonu!'); return; }
+    const el = document.getElementById('results-phone');
+    showLoading(el);
+    try {
+        const fd = new FormData();
+        fd.append('phone', phone);
+        const res = await fetch(`${API}/api/search/phone`, { method: 'POST', body: fd });
+        const data = await res.json();
+        renderPhoneResults(el, data.results, phone);
+    } catch(e) { showError(el, 'Błąd połączenia z serwerem: ' + e.message); }
+}
+
+let selectedFile = null;
+function handleFileSelect(event) {
+    selectedFile = event.target.files[0];
+    if (!selectedFile) return;
+    const img = document.getElementById('preview-img');
+    img.src = URL.createObjectURL(selectedFile);
+    img.style.display = 'block';
+    document.getElementById('img-search-btn').disabled = false;
+}
+
+async function searchImage() {
+    if (!selectedFile) { alert('Wybierz zdjęcie!'); return; }
+    const el = document.getElementById('results-image');
+    showLoading(el);
+    try {
+        const fd = new FormData();
+        fd.append('file', selectedFile);
+        const res = await fetch(`${API}/api/search/image`, { method: 'POST', body: fd });
+        const data = await res.json();
+        renderImageResults(el, data.results, selectedFile.name);
+    } catch(e) { showError(el, 'Błąd połączenia z serwerem: ' + e.message); }
+}
+
+async function searchAll() {
+    const fn = document.getElementById('all-first-name').value.trim();
+    const ln = document.getElementById('all-last-name').value.trim();
+    if (!fn || !ln) { alert('Imię i nazwisko są wymagane!'); return; }
+    const el = document.getElementById('results-all');
+    showLoading(el);
+    try {
+        const fd = new FormData();
+        fd.append('first_name', fn);
+        fd.append('last_name', ln);
+        fd.append('email', document.getElementById('all-email').value.trim());
+        fd.append('phone', document.getElementById('all-phone').value.trim());
+        const res = await fetch(`${API}/api/search/all`, { method: 'POST', body: fd });
+        const data = await res.json();
+        let html = `<h3 style="color:#00d4ff; margin-bottom:16px;">📊 Wyniki dla: ${fn} ${ln}</h3>`;
+        if (data.results.name) { const tmpEl = document.createElement('div'); renderNameResults(tmpEl, data.results.name, fn+' '+ln); html += tmpEl.innerHTML; }
+        if (data.results.email) { const tmpEl = document.createElement('div'); renderEmailResults(tmpEl, data.results.email, document.getElementById('all-email').value); html += tmpEl.innerHTML; }
+        if (data.results.phone) { const tmpEl = document.createElement('div'); renderPhoneResults(tmpEl, data.results.phone, document.getElementById('all-phone').value); html += tmpEl.innerHTML; }
+        el.innerHTML = html;
+        el.classList.add('show');
+    } catch(e) { showError(el, 'Błąd: ' + e.message); }
+}
+
+function renderNameResults(el, r, query) {
+    const socialFound = r.social_media ? r.social_media.filter(x => x.found) : [];
+    let html = `
+    <div class="result-section">
+        <h3>📊 Wyniki dla: "${query}" <span class="badge">${socialFound.length} profili znalezionych</span></h3>
+    </div>`;
+
+    if (socialFound.length > 0) {
+        html += `<div class="result-section"><h3>✅ Znalezione Profile <span class="badge green">${socialFound.length}</span></h3>`;
+        socialFound.forEach(item => {
+            html += `<div class="found-item"><div class="dot"></div><strong style="min-width:100px;font-size:13px">${item.platform}</strong><a href="${item.url}" target="_blank">@${item.username} → ${item.url}</a></div>`;
+        });
+        html += `</div>`;
+    }
+
+    if (r.possible_usernames && r.possible_usernames.length > 0) {
+        html += `<div class="result-section"><h3>🔤 Możliwe Nazwy Użytkownika</h3><div class="username-list">`;
+        r.possible_usernames.forEach(u => { html += `<span class="username-tag">${u}</span>`; });
+        html += `</div></div>`;
+    }
+
+    if (r.google_links && r.google_links.length > 0) {
+        html += `<div class="result-section"><h3>🔗 Linki do Przeszukania</h3>`;
+        r.google_links.forEach(link => {
+            html += `<div class="found-item"><div class="dot" style="background:#4db8ff"></div><a href="${link.url}" target="_blank">🔍 ${link.label}</a></div>`;
+        });
+        html += `</div>`;
+    }
+
+    el.innerHTML = html;
+    el.classList.add('show');
+}
+
+function renderEmailResults(el, r, query) {
+    const holeheFound = r.holehe ? r.holehe.filter(x => x.service) : [];
+    const breaches = r.breaches || [];
+    let html = `
+    <div class="result-section">
+        <h3>📊 Wyniki dla: "${query}"
+            <span class="badge green">${holeheFound.length} serwisów</span>
+            ${breaches.length > 0 ? `<span class="badge red">${breaches.length} wycieków</span>` : ''}
+        </h3>
+    </div>`;
+
+    if (holeheFound.length > 0) {
+        html += `<div class="result-section"><h3>✅ Zarejestrowany w Serwisach <span class="badge green">${holeheFound.length}</span></h3>`;
+        holeheFound.forEach(item => {
+            html += `<div class="found-item"><div class="dot"></div><span style="font-size:13px">${item.service}</span></div>`;
+        });
+        html += `</div>`;
+    }
+
+    if (breaches.length > 0) {
+        html += `<div class="result-section"><h3>⚠️ Wycieki Danych <span class="badge red">${breaches.length}</span></h3>`;
+        breaches.forEach(b => {
+            html += `<div class="found-item"><div class="dot" style="background:#ff4d6d"></div><strong style="font-size:13px">${b.name}</strong><span style="color:#5a7a9a; font-size:12px; margin-left:8px">${b.date} | ${b.data_classes?.join(', ')}</span></div>`;
+        });
+        html += `</div>`;
+    }
+
+    if (r.google_links && r.google_links.length > 0) {
+        html += `<div class="result-section"><h3>🔗 Linki do Sprawdzenia</h3>`;
+        r.google_links.forEach(link => {
+            html += `<div class="found-item"><div class="dot" style="background:#4db8ff"></div><a href="${link.url}" target="_blank">🔍 ${link.label}</a></div>`;
+        });
+        html += `</div>`;
+    }
+
+    el.innerHTML = html;
+    el.classList.add('show');
+}
+
+function renderPhoneResults(el, r, query) {
+    const info = r.basic_info || {};
+    let html = `
+    <div class="result-section">
+        <h3>📊 Wyniki dla: "${query}" <span class="badge ${info.valid ? 'green' : 'red'}">${info.valid ? 'Prawidłowy numer' : 'Numer nierozpoznany'}</span></h3>
+        <div class="info-grid" style="margin-top:12px">
+            <div class="info-item"><div class="info-label">Numer</div><div class="info-value">${info.number || query}</div></div>
+            <div class="info-item"><div class="info-label">Kraj</div><div class="info-value">${info.country || 'Nieznany'}</div></div>
+            <div class="info-item"><div class="info-label">Operator</div><div class="info-value">${info.carrier || 'Nieznany'}</div></div>
+            <div class="info-item"><div class="info-label">Typ linii</div><div class="info-value">${info.line_type || 'Nieznany'}</div></div>
+        </div>
+    </div>`;
+
+    if (r.google_links && r.google_links.length > 0) {
+        html += `<div class="result-section"><h3>🔗 Linki do Sprawdzenia</h3>`;
+        r.google_links.forEach(link => {
+            html += `<div class="found-item"><div class="dot" style="background:#4db8ff"></div><a href="${link.url}" target="_blank">🔍 ${link.label}</a></div>`;
+        });
+        html += `</div>`;
+    }
+
+    if (r.social_links && r.social_links.length > 0) {
+        html += `<div class="result-section"><h3>💬 Sprawdź Komunikatory</h3>`;
+        r.social_links.forEach(s => {
+            html += `<div class="found-item"><div class="dot" style="background:#00cc88"></div><strong style="min-width:80px;font-size:13px">${s.platform}</strong><a href="${s.url}" target="_blank">${s.note}</a></div>`;
+        });
+        html += `</div>`;
+    }
+
+    el.innerHTML = html;
+    el.classList.add('show');
+}
+
+function renderImageResults(el, r, query) {
+    const info = r.image_info || {};
+    const links = r.reverse_search_links || [];
+    let html = `
+    <div class="result-section">
+        <h3>📊 Analiza Zdjęcia: "${query}"</h3>
+        <div class="info-grid" style="margin-top:12px">
+            <div class="info-item"><div class="info-label">Plik</div><div class="info-value">${info.filename}</div></div>
+            <div class="info-item"><div class="info-label">Rozmiar</div><div class="info-value">${info.size_kb} KB</div></div>
+            <div class="info-item"><div class="info-label">Format</div><div class="info-value">${info.format}</div></div>
+        </div>
+        <p style="color:#4a8a4a; font-size:13px; margin-top:12px; background:#0a100a; padding:10px; border-radius:8px;">
+            💡 ${r.instructions}
+        </p>
+    </div>
+    <div class="result-section"><h3>🔍 Wyszukiwarki Obrazem <span class="badge">${links.length} serwisów</span></h3>
+    <div class="service-grid">`;
+    links.forEach(link => {
+        html += `<div class="service-card">
+            <div class="service-name">${link.service}</div>
+            <div class="service-desc">${link.description}</div>
+            <a href="${link.url}" target="_blank">➡️ Otwórz serwis</a>
+            <div style="font-size:11px; color:#3a5a7a; margin-top:4px">${link.how}</div>
+        </div>`;
+    });
+    html += `</div></div>`;
+    el.innerHTML = html;
+    el.classList.add('show');
+}
+
+// Drag & drop
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+        selectedFile = file;
+        const img = document.getElementById('preview-img');
+        img.src = URL.createObjectURL(file);
+        img.style.display = 'block';
+        document.getElementById('img-search-btn').disabled = false;
+    }
+});
+</script>
+
+</body>
+</html>
