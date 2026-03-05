@@ -3,7 +3,7 @@ import aiohttp
 import subprocess
 import json
 import sys
-from typing import dict, list
+from typing import List, Dict
 
 async def search_by_email(email: str) -> dict:
     results = {

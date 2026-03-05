@@ -4,7 +4,7 @@ import base64
 import os
 import tempfile
 import urllib.parse
-from typing import dict
+from typing import List, Dict
 
 async def search_by_image(image_data: bytes, filename: str) -> dict:
     results = {

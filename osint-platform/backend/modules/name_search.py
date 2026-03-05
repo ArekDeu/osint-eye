@@ -1,7 +1,7 @@
 import asyncio
 import aiohttp
 import urllib.parse
-from typing import dict, list
+from typing import List, Dict
 
 async def search_by_name(first_name: str, last_name: str) -> dict:
     full_name = f"{first_name} {last_name}"

@@ -4,7 +4,7 @@ import subprocess
 import json
 import sys
 import urllib.parse
-from typing import dict
+from typing import List, Dict
 
 async def search_by_phone(phone: str) -> dict:
     # Clean phone number
